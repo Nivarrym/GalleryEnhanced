@@ -157,47 +157,6 @@
     pointer-events: none;
 }
 
-.gallery-card-selected-check {
-    color: var(--gallery-accent);
-    background: var(--gallery-bg-elevated);
-    border-radius: 50%;
-    line-height: 0;
-    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.35);
-    pointer-events: none;
-}
-
-.gallery-card-status {
-    position: absolute;
-    top: 8px;
-    left: 8px;
-    z-index: 6;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    pointer-events: none;
-}
-
-.gallery-card-status .gallery-card-selected-check {
-    position: static;
-    font-size: 18px;
-}
-
-.gallery-card-tag {
-    padding: 3px;
-    border-radius: 50%;
-    background: var(--gallery-bg-elevated);
-    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.35);
-    font-size: 18px;
-}
-
-.gallery-card-tag-favorite {
-    color: #faad14;
-}
-
-.gallery-card-tag-trash {
-    color: #ff4d4f;
-}
-
 .image-card.gallery-card-trash {
     filter: saturate(0.25);
 }
@@ -208,12 +167,55 @@
     right: 8px;
     z-index: 5;
     display: flex;
-    align-items: center;
+    flex-direction: column;
+    align-items: flex-end;
     gap: 6px;
+    max-width: calc(100% - 16px);
     opacity: 0;
     transform: translateY(-2px);
     transition: opacity 0.12s ease, transform 0.12s ease;
     pointer-events: none;
+}
+
+.gallery-card-marks {
+    position: absolute;
+    top: 38px;
+    right: 8px;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    pointer-events: none;
+}
+
+.gallery-card-marks .ant-btn {
+    background: rgba(0, 0, 0, 0.55);
+    border-color: transparent;
+    color: #fff;
+    backdrop-filter: blur(4px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.12s ease;
+}
+
+.image-card:hover .gallery-card-marks .ant-btn,
+.image-card:focus-within .gallery-card-marks .ant-btn,
+.gallery-card-marks .ant-btn.is-active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.gallery-card-marks .ant-btn:hover {
+    background: #1890ff !important;
+    color: #fff !important;
+}
+
+.gallery-card-action-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
 }
 
 .image-card:hover .gallery-card-actions,
@@ -238,6 +240,16 @@
 .gallery-card-actions .ant-btn-dangerous:hover {
     background: #ff4d4f !important;
     color: #fff !important;
+}
+
+.gallery-card-actions .ant-btn.gallery-mark-favorite.is-active,
+.gallery-card-marks .ant-btn.gallery-mark-favorite.is-active {
+    color: #faad14;
+}
+
+.gallery-card-actions .ant-btn.gallery-mark-trash.is-active,
+.gallery-card-marks .ant-btn.gallery-mark-trash.is-active {
+    color: #ff4d4f;
 }
 
 .gallery-card-footer {

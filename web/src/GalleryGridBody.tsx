@@ -147,6 +147,7 @@ const GalleryGridBody = ({ imagesDetailsList, currentFolder, onInfoClick, onVide
                                             trash={isAssetTrashed(image.url)}
                                             favorite={isAssetFavorite(image.url)}
                                             onToggleFavorite={() => toggleAssetTag(image.url, 'favorite')}
+                                            onToggleTrash={() => toggleAssetTag(image.url, 'trash')}
                                             setHoveredAssetUrl={setHoveredAssetUrl}
                                             setPreviewAssetUrl={setPreviewAssetUrl}
                                         />

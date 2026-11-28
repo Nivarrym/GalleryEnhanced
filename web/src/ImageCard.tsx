@@ -1,7 +1,6 @@
 import { App, Button, Image, Popconfirm, Tooltip, Typography } from 'antd';
 import type { FileDetails } from './types';
 import { hasMetadata } from './types';
-import CheckCircleFilled from '@ant-design/icons/lib/icons/CheckCircleFilled';
 import DeleteOutlined from '@ant-design/icons/lib/icons/DeleteOutlined';
 import ExportOutlined from '@ant-design/icons/lib/icons/ExportOutlined';
 import FolderOpenOutlined from '@ant-design/icons/lib/icons/FolderOpenOutlined';
@@ -96,6 +95,7 @@ const ImageCard = memo(function ImageCard({
     trash,
     favorite,
     onToggleFavorite,
+    onToggleTrash,
     setHoveredAssetUrl,
     setPreviewAssetUrl,
 }: {
@@ -113,6 +113,7 @@ const ImageCard = memo(function ImageCard({
     trash: boolean;
     favorite: boolean;
     onToggleFavorite: () => void;
+    onToggleTrash: () => void;
     setHoveredAssetUrl: Dispatch<SetStateAction<string | undefined>>;
     setPreviewAssetUrl: Dispatch<SetStateAction<string | undefined>>;
 }) {
@@ -436,7 +437,7 @@ const ImageCard = memo(function ImageCard({
                 borderRadius: 8,
                 overflow: "hidden",
                 margin: 0,
-                opacity: dragging ? 0.5 : (trash ? 0.62 : 1),
+                opacity: dragging ? 0.5 : 1,
                 display: "flex",
                 alignContent: "center",
                 justifyContent: "center",
@@ -525,31 +526,122 @@ const ImageCard = memo(function ImageCard({
                 />
             </>}
 
-            <div className="gallery-card-status">
-                {selected && <CheckCircleFilled className="gallery-card-selected-check" />}
-                {favorite && <StarFilled className="gallery-card-tag gallery-card-tag-favorite" aria-label="Favorite" />}
-                {trash && <DeleteFilled className="gallery-card-tag gallery-card-tag-trash" aria-label="Trash" />}
-            </div>
-
             <div
                 className="gallery-card-actions"
                 onClick={(event) => { event.stopPropagation(); event.preventDefault(); }}
                 onPointerDown={(event) => event.stopPropagation()}
                 onMouseDown={(event) => event.stopPropagation()}
             >
-                <Tooltip title="Preview without selecting">
-                    <Button
-                        className="gallery-card-action"
-                        shape="circle"
-                        size="small"
-                        icon={<ZoomInOutlined />}
-                        onClick={handlePlainPreview}
-                        aria-label={`Preview ${image.name} without selecting`}
-                    />
-                </Tooltip>
+                <div className="gallery-card-action-row">
+                    <Tooltip title="Preview without selecting">
+                        <Button
+                            className="gallery-card-action"
+                            shape="circle"
+                            size="small"
+                            icon={<ZoomInOutlined />}
+                            onClick={handlePlainPreview}
+                            aria-label={`Preview ${image.name} without selecting`}
+                        />
+                    </Tooltip>
+                    {image.type === 'image' && (
+                        <Tooltip title="Open the source workflow in a new workflow tab">
+                            <Button
+                                className="gallery-card-action"
+                                shape="circle"
+                                size="small"
+                                loading={openingWorkflow}
+                                icon={<NodeIndexOutlined />}
+                                onClick={handleOpenSourceWorkflow}
+                                aria-label={`Open source workflow for ${image.name}`}
+                            />
+                        </Tooltip>
+                    )}
+                    {(image.type === 'image' || image.type === 'media' || image.type === 'audio') && (
+                        <Tooltip title="Add to active graph">
+                            <Button
+                                className="gallery-card-action"
+                                shape="circle"
+                                size="small"
+                                icon={<PlusSquareOutlined />}
+                                onClick={handleAddToGraph}
+                                aria-label={`Add ${image.name} to the active graph`}
+                            />
+                        </Tooltip>
+                    )}
+                    {(image.type === 'image' || image.type === 'media' || image.type === 'audio') && (
+                        <Tooltip title="Replace the selected graph node's asset">
+                            <Button
+                                className="gallery-card-action"
+                                shape="circle"
+                                size="small"
+                                icon={<SwapOutlined />}
+                                onClick={handleReplaceInGraph}
+                                aria-label={`Replace the selected graph node with ${image.name}`}
+                            />
+                        </Tooltip>
+                    )}
+                    {image.type === 'image' && (
+                        <Tooltip title="Edit mask">
+                            <Button
+                                className="gallery-card-action"
+                                shape="circle"
+                                size="small"
+                                icon={<HighlightOutlined />}
+                                onClick={handleMaskEditor}
+                                aria-label={`Edit mask for ${image.name}`}
+                            />
+                        </Tooltip>
+                    )}
+                    <Tooltip title="Show in file manager">
+                        <Button
+                            className="gallery-card-action"
+                            shape="circle"
+                            size="small"
+                            icon={<FolderOpenOutlined />}
+                            onClick={handleReveal}
+                            aria-label={`Show ${image.name} in file manager`}
+                        />
+                    </Tooltip>
+                    <Tooltip title="Open in default application">
+                        <Button
+                            className="gallery-card-action"
+                            shape="circle"
+                            size="small"
+                            icon={<ExportOutlined />}
+                            onClick={handleOpenExternal}
+                            aria-label={`Open ${image.name} in default application`}
+                        />
+                    </Tooltip>
+                    <Popconfirm
+                        title="Delete asset?"
+                        description={image.name}
+                        okText="Delete"
+                        cancelText="Cancel"
+                        okButtonProps={{ danger: true }}
+                        onConfirm={handleDelete}
+                    >
+                        <Button
+                            danger
+                            type="primary"
+                            shape="circle"
+                            size="small"
+                            loading={deleting}
+                            icon={<DeleteOutlined />}
+                            aria-label={`Delete ${image.name}`}
+                        />
+                    </Popconfirm>
+                </div>
+            </div>
+
+            <div
+                className="gallery-card-marks"
+                onClick={(event) => { event.stopPropagation(); event.preventDefault(); }}
+                onPointerDown={(event) => event.stopPropagation()}
+                onMouseDown={(event) => event.stopPropagation()}
+            >
                 <Tooltip title={favorite ? 'Remove from favorites (F)' : 'Add to favorites (F)'}>
                     <Button
-                        className="gallery-card-action"
+                        className={`gallery-card-action gallery-mark-favorite${favorite ? ' is-active' : ''}`}
                         shape="circle"
                         size="small"
                         icon={favorite ? <StarFilled /> : <StarOutlined />}
@@ -557,93 +649,16 @@ const ImageCard = memo(function ImageCard({
                         aria-label={`${favorite ? 'Remove' : 'Add'} ${image.name} ${favorite ? 'from' : 'to'} favorites`}
                     />
                 </Tooltip>
-                {image.type === 'image' && (
-                    <Tooltip title="Edit mask">
-                        <Button
-                            className="gallery-card-action"
-                            shape="circle"
-                            size="small"
-                            icon={<HighlightOutlined />}
-                            onClick={handleMaskEditor}
-                            aria-label={`Edit mask for ${image.name}`}
-                        />
-                    </Tooltip>
-                )}
-                {(image.type === 'image' || image.type === 'media' || image.type === 'audio') && (
-                    <Tooltip title="Add to active graph">
-                        <Button
-                            className="gallery-card-action"
-                            shape="circle"
-                            size="small"
-                            icon={<PlusSquareOutlined />}
-                            onClick={handleAddToGraph}
-                            aria-label={`Add ${image.name} to the active graph`}
-                        />
-                    </Tooltip>
-                )}
-                {(image.type === 'image' || image.type === 'media' || image.type === 'audio') && (
-                    <Tooltip title="Replace the selected graph node's asset">
-                        <Button
-                            className="gallery-card-action"
-                            shape="circle"
-                            size="small"
-                            icon={<SwapOutlined />}
-                            onClick={handleReplaceInGraph}
-                            aria-label={`Replace the selected graph node with ${image.name}`}
-                        />
-                    </Tooltip>
-                )}
-                {image.type === 'image' && (
-                    <Tooltip title="Open the source workflow in a new workflow tab">
-                        <Button
-                            className="gallery-card-action"
-                            shape="circle"
-                            size="small"
-                            loading={openingWorkflow}
-                            icon={<NodeIndexOutlined />}
-                            onClick={handleOpenSourceWorkflow}
-                            aria-label={`Open source workflow for ${image.name}`}
-                        />
-                    </Tooltip>
-                )}
-                <Tooltip title="Show in file manager">
+                <Tooltip title={trash ? 'Remove trash mark (Space)' : 'Mark as trash (Space)'}>
                     <Button
-                        className="gallery-card-action"
+                        className={`gallery-card-action gallery-mark-trash${trash ? ' is-active' : ''}`}
                         shape="circle"
                         size="small"
-                        icon={<FolderOpenOutlined />}
-                        onClick={handleReveal}
-                        aria-label={`Show ${image.name} in file manager`}
+                        icon={<DeleteFilled />}
+                        onClick={onToggleTrash}
+                        aria-label={`${trash ? 'Remove trash mark from' : 'Mark'} ${image.name}${trash ? '' : ' as trash'}`}
                     />
                 </Tooltip>
-                <Tooltip title="Open in default application">
-                    <Button
-                        className="gallery-card-action"
-                        shape="circle"
-                        size="small"
-                        icon={<ExportOutlined />}
-                        onClick={handleOpenExternal}
-                        aria-label={`Open ${image.name} in default application`}
-                    />
-                </Tooltip>
-                <Popconfirm
-                    title="Delete asset?"
-                    description={image.name}
-                    okText="Delete"
-                    cancelText="Cancel"
-                    okButtonProps={{ danger: true }}
-                    onConfirm={handleDelete}
-                >
-                    <Button
-                        danger
-                        type="primary"
-                        shape="circle"
-                        size="small"
-                        loading={deleting}
-                        icon={<DeleteOutlined />}
-                        aria-label={`Delete ${image.name}`}
-                    />
-                </Popconfirm>
             </div>
 
             <div className="gallery-card-footer">
@@ -684,6 +699,7 @@ const ImageCard = memo(function ImageCard({
     && prev.trash === next.trash
     && prev.favorite === next.favorite
     && prev.onToggleFavorite === next.onToggleFavorite
+    && prev.onToggleTrash === next.onToggleTrash
     && prev.setHoveredAssetUrl === next.setHoveredAssetUrl
     && prev.setPreviewAssetUrl === next.setPreviewAssetUrl
 ));

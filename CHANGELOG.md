@@ -13,6 +13,10 @@ starting from upstream **2.7.1**. Maintained by **Nivarrym**.
   overlay; clicking its backdrop closes it and it can be reopened repeatedly.
 - **Open gallery:** renamed the loader's node button from the misleading
   "Upload File" to "Open gallery".
+- **Card actions:** removed the visual selected check and corner tag badges;
+  reordered primary actions and moved favorite/trash to a second action row.
+  A favorited asset keeps a pinned clickable star in the card corner even when
+  the hover toolbar is hidden.
 - **Node layout:** split video/audio nodes into separate modules, added shared
   filesystem/combo helpers (`gallery_node_utils.py`,
   `gallery_media_common.py`), renamed `gallery_node.py` to
